@@ -1,4 +1,5 @@
-package dns_1cloud
+// Package dns1cloud implements methods for API of 1Cloud's DNS hosting
+package dns1cloud
 
 import (
 	"bytes"
@@ -14,15 +15,18 @@ import (
 
 const (
 	defaultTimeout = time.Second
-	apiUrl         = "https://api.1cloud.ru/dns"
+	defaultAPIHost = "https://api.1cloud.ru"
 )
 
+// DNS1Cloud represents a client for API of 1Cloud's DNS hosting
 type DNS1Cloud struct {
+	apiHost string
 	apiKey  string
 	timeout time.Duration
 	client  *http.Client
 }
 
+// New creates and return new DNS1Cloud
 func New(apiKey string, opts ...OptFunc) *DNS1Cloud {
 	c := &DNS1Cloud{
 		apiKey: apiKey,
@@ -34,6 +38,10 @@ func New(apiKey string, opts ...OptFunc) *DNS1Cloud {
 
 	if c.timeout == 0 {
 		c.timeout = defaultTimeout
+	}
+
+	if len(c.apiHost) == 0 {
+		c.apiHost = defaultAPIHost
 	}
 
 	c.client = &http.Client{
@@ -48,6 +56,12 @@ type OptFunc func(*DNS1Cloud)
 func WithTimeout(t time.Duration) OptFunc {
 	return func(c *DNS1Cloud) {
 		c.timeout = t
+	}
+}
+
+func WithApiHost(apiHost string) OptFunc {
+	return func(c *DNS1Cloud) {
+		c.apiHost = apiHost
 	}
 }
 
@@ -81,7 +95,7 @@ func (c *DNS1Cloud) send(ctx context.Context, cmd command, response interface{})
 }
 
 func (c *DNS1Cloud) getRequest(cmd command) (*http.Request, error) {
-	url := apiUrl
+	url := c.apiHost
 	if len(cmd.endpoint) > 0 {
 		url = strings.Join([]string{url, cmd.endpoint}, "/")
 	}
