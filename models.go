@@ -121,7 +121,7 @@ type Record struct {
 	Target               string     `json:"Target"`
 	Proto                string     `json:"Proto"`
 	Service              string     `json:"Service"`
-	TTL                  int        `json:"TTL"`
+	TTL                  uint32     `json:"TTL"`
 	State                State      `json:"State"`
 	DateCreate           DateTime   `json:"DateCreate"`
 	CanonicalDescription string     `json:"CanonicalDescription"`
