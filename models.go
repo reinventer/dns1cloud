@@ -28,6 +28,11 @@ func (s *State) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+var dateTimeLayouts = []string{
+	"2006-01-02T15:04:05.999999999",
+	time.RFC3339Nano,
+}
+
 // DateTime is a wrapper for unmarshaling time from JSON
 type DateTime struct {
 	time.Time
@@ -41,7 +46,13 @@ func (d *DateTime) UnmarshalJSON(b []byte) error {
 		err error
 	)
 	if str != "null" {
-		t, err = time.Parse("2006-01-02T15:04:05.999999999", strings.Trim(string(b), `"`))
+		tm := strings.Trim(string(b), `"`)
+		for _, layout := range dateTimeLayouts {
+			t, err = time.Parse(layout, tm)
+			if err == nil {
+				break
+			}
+		}
 		if err != nil {
 			return err
 		}

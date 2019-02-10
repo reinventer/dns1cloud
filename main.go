@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	defaultTimeout = time.Second
+	defaultTimeout = 5 * time.Second
 	defaultAPIHost = "https://api.1cloud.ru"
 )
 
@@ -84,6 +85,14 @@ func (c *DNS1Cloud) send(ctx context.Context, cmd command, response interface{})
 		return errors.Wrap(err, "could not do http request")
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return errors.Wrapf(err, "could not read body of failed response, code: %d", resp.StatusCode)
+		}
+		return errors.Errorf("bad response, status: %d, body: %s", resp.StatusCode, string(body))
+	}
 
 	dec := json.NewDecoder(resp.Body)
 
