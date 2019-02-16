@@ -9,7 +9,7 @@ import (
 )
 
 // GetDomain returns domain by id
-func (c *DNS1Cloud) GetDomain(ctx context.Context, domainID uint32) (Domain, error) {
+func (c *DNS1Cloud) GetDomain(ctx context.Context, domainID uint64) (Domain, error) {
 	cmd := command{
 		method:   http.MethodGet,
 		endpoint: fmt.Sprintf("dns/%d", domainID),

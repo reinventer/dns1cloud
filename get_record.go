@@ -9,7 +9,7 @@ import (
 )
 
 // GetRecord returns record by id
-func (c *DNS1Cloud) GetRecord(ctx context.Context, recordID uint32) (Record, error) {
+func (c *DNS1Cloud) GetRecord(ctx context.Context, recordID uint64) (Record, error) {
 	cmd := command{
 		method:   http.MethodGet,
 		endpoint: fmt.Sprintf("dns/record/%d", recordID),

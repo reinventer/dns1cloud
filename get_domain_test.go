@@ -106,7 +106,7 @@ func TestDNS1Cloud_GetDomain(t *testing.T) {
 			name:           "bad response",
 			responseStatus: http.StatusInternalServerError,
 			responseJSON:   `{"Message": "oops, error"}`,
-			expErrString:   `could not send command get_domain: bad response, status: 500, body: {"Message": "oops, error"}`,
+			expErrString:   `could not send command get_domain: bad response, status: 500, body: '{"Message": "oops, error"}'`,
 		},
 	}
 

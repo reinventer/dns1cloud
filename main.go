@@ -94,13 +94,15 @@ func (c *DNS1Cloud) send(ctx context.Context, cmd command, response interface{})
 		if err != nil {
 			return errors.Wrapf(err, "could not read body of failed response, code: %d", resp.StatusCode)
 		}
-		return errors.Errorf("bad response, status: %d, body: %s", resp.StatusCode, string(body))
+		return errors.Errorf("bad response, status: %d, body: '%s'", resp.StatusCode, string(body))
 	}
 
-	dec := json.NewDecoder(resp.Body)
+	if response != nil {
+		dec := json.NewDecoder(resp.Body)
 
-	if err = dec.Decode(response); err != nil {
-		return errors.Wrap(err, "could not unmarshal response")
+		if err = dec.Decode(response); err != nil {
+			return errors.Wrap(err, "could not unmarshal response")
+		}
 	}
 
 	return nil

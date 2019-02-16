@@ -108,7 +108,7 @@ func TestDNS1Cloud_List(t *testing.T) {
 			name:           "bad response",
 			responseStatus: http.StatusInternalServerError,
 			responseJSON:   `{"Message": "oops, error"}`,
-			expErrString:   "could not send command list: bad response, status: 500, body: {\"Message\": \"oops, error\"}",
+			expErrString:   `could not send command list: bad response, status: 500, body: '{"Message": "oops, error"}'`,
 		},
 	}
 
