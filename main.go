@@ -52,14 +52,17 @@ func New(apiKey string, opts ...OptFunc) *DNS1Cloud {
 	return c
 }
 
+// OptFunc is type for option function
 type OptFunc func(*DNS1Cloud)
 
+// WithTimeout is option function for setting timeout for http client
 func WithTimeout(t time.Duration) OptFunc {
 	return func(c *DNS1Cloud) {
 		c.timeout = t
 	}
 }
 
+// WithApiHost is option function for setting API host
 func WithApiHost(apiHost string) OptFunc {
 	return func(c *DNS1Cloud) {
 		c.apiHost = apiHost
