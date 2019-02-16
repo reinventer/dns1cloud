@@ -23,7 +23,6 @@ const (
 type DNS1Cloud struct {
 	apiHost string
 	apiKey  string
-	timeout time.Duration
 	client  *http.Client
 }
 
@@ -37,16 +36,12 @@ func New(apiKey string, opts ...OptFunc) *DNS1Cloud {
 		f(c)
 	}
 
-	if c.timeout == 0 {
-		c.timeout = defaultTimeout
+	if c.client == nil {
+		c.client = &http.Client{Timeout: defaultTimeout}
 	}
 
 	if len(c.apiHost) == 0 {
 		c.apiHost = defaultAPIHost
-	}
-
-	c.client = &http.Client{
-		Timeout: c.timeout,
 	}
 
 	return c
@@ -55,10 +50,10 @@ func New(apiKey string, opts ...OptFunc) *DNS1Cloud {
 // OptFunc is type for option function
 type OptFunc func(*DNS1Cloud)
 
-// WithTimeout is option function for setting timeout for http client
-func WithTimeout(t time.Duration) OptFunc {
+// WithHTTPClient is option function for setting HTTP client
+func WithTimeout(cli *http.Client) OptFunc {
 	return func(c *DNS1Cloud) {
-		c.timeout = t
+		c.client = cli
 	}
 }
 
