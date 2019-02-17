@@ -224,7 +224,7 @@ func TestDNS1Cloud_AddRecord(t *testing.T) {
 				"Port":"", "Weight": "", "Service": "", "MnemonicName": "", "ExtHostName": "","State": "Active", "TTL": 3600,
 				"Proto": "","CanonicalDescription": "text.test.ru. 3600 IN TXT some_text"}`,
 			expPath:    "/dns/recordtxt",
-			expRequest: `{"DomainId": "123", "HostName": "text.test.com", "Text": "some_text", "TTL": "3600"}`,
+			expRequest: `{"DomainId": "123", "Name": "text.test.com", "Text": "some_text", "TTL": "3600"}`,
 			expRecord: Record{
 				ID:                   1,
 				TypeRecord:           RecordTypeTXT,

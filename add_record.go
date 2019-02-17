@@ -99,7 +99,7 @@ type addRecordSRVParams struct {
 // addRecordTXTParams parameters for request for creating TXT records
 type addRecordTXTParams struct {
 	DomainID string `json:"DomainId"`
-	HostName string `json:"HostName"`
+	Name     string `json:"Name"`
 	Text     string `json:"Text"`
 	TTL      string `json:"TTL,omitempty"`
 }
@@ -247,7 +247,7 @@ func makeAddRecordTXTCommand(domainID uint64, record Record) (command, error) {
 
 	params := addRecordTXTParams{
 		DomainID: strconv.FormatUint(domainID, 10),
-		HostName: record.HostName,
+		Name:     record.HostName,
 		Text:     record.Text,
 		TTL:      ttl,
 	}
