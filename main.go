@@ -51,7 +51,7 @@ func New(apiKey string, opts ...OptFunc) *DNS1Cloud {
 type OptFunc func(*DNS1Cloud)
 
 // WithHTTPClient is option function for setting HTTP client
-func WithTimeout(cli *http.Client) OptFunc {
+func WithHTTPClient(cli *http.Client) OptFunc {
 	return func(c *DNS1Cloud) {
 		c.client = cli
 	}
