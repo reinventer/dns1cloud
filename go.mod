@@ -1,4 +1,4 @@
-module github.com/reinventer/dns-1cloud
+module github.com/reinventer/dns1cloud
 
 require (
 	github.com/pkg/errors v0.8.1
