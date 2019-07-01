@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -137,4 +138,17 @@ func (c *DNS1Cloud) getRequest(cmd command) (*http.Request, error) {
 	}
 
 	return req, nil
+}
+
+func getTTL(ttl uint32) (string, error) {
+	if ttl != 0 {
+		str := strconv.FormatUint(uint64(ttl), 10)
+		for _, t := range validTTLs {
+			if t == str {
+				return str, nil
+			}
+		}
+		return "", errors.Errorf("TTL %q is not valid", str)
+	}
+	return "", nil
 }

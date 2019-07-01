@@ -2,6 +2,7 @@ package dns1cloud
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"strconv"
@@ -9,12 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-var validTTLs = [...]string{
-	"1", "5", "30", "60", "300", "600", "900", "1800", "3600", "7200", "21160", "43200", "86400",
-}
-
-// AddRecord adds record to domain
-func (c *DNS1Cloud) AddRecord(
+// UpdateRecord updates record
+func (c *DNS1Cloud) UpdateRecord(
 	ctx context.Context,
 	domainID uint64,
 	record Record,
@@ -27,19 +24,19 @@ func (c *DNS1Cloud) AddRecord(
 
 	switch record.TypeRecord {
 	case RecordTypeA:
-		cmd, err = makeAddRecordACommand(domainID, record)
+		cmd, err = makeUpdateRecordACommand(domainID, record)
 	case RecordTypeAAAA:
-		cmd, err = makeAddRecordAAAACommand(domainID, record)
+		cmd, err = makeUpdateRecordAAAACommand(domainID, record)
 	case RecordTypeCNAME:
-		cmd, err = makeAddRecordCNAMECommand(domainID, record)
+		cmd, err = makeUpdateRecordCNAMECommand(domainID, record)
 	case RecordTypeMX:
-		cmd, err = makeAddRecordMXCommand(domainID, record)
+		cmd, err = makeUpdateRecordMXCommand(domainID, record)
 	case RecordTypeNS:
-		cmd, err = makeAddRecordNSCommand(domainID, record)
+		cmd, err = makeUpdateRecordNSCommand(domainID, record)
 	case RecordTypeSRV:
-		cmd, err = makeAddRecordSRVCommand(domainID, record)
+		cmd, err = makeUpdateRecordSRVCommand(domainID, record)
 	case RecordTypeTXT:
-		cmd, err = makeAddRecordTXTCommand(domainID, record)
+		cmd, err = makeUpdateRecordTXTCommand(domainID, record)
 	default:
 		err = errors.Errorf("unknown record type: %d", record.TypeRecord)
 	}
@@ -51,40 +48,40 @@ func (c *DNS1Cloud) AddRecord(
 	return res, err
 }
 
-// addRecordAParams parameters for request for creating A and AAAA records
-type addRecordAParams struct {
+// updateRecordAParams parameters for request for updating A and AAAA records
+type updateRecordAParams struct {
 	DomainID string `json:"DomainId"`
 	IP       string `json:"IP"`
 	Name     string `json:"Name"`
 	TTL      string `json:"TTL,omitempty"`
 }
 
-// addRecordCNAMEParams parameters for request for creating CNAME records
-type addRecordCNAMEParams struct {
+// updateRecordCNAMEParams parameters for request for updating CNAME records
+type updateRecordCNAMEParams struct {
 	DomainID     string `json:"DomainId"`
 	Name         string `json:"Name"`
 	MnemonicName string `json:"MnemonicName"`
 	TTL          string `json:"TTL,omitempty"`
 }
 
-// addRecordMXParams parameters for request for creating MX records
-type addRecordMXParams struct {
+// updateRecordMXParams parameters for request for updating MX records
+type updateRecordMXParams struct {
 	DomainID string `json:"DomainId"`
 	HostName string `json:"HostName"`
 	Priority string `json:"Priority"`
 	TTL      string `json:"TTL,omitempty"`
 }
 
-// addRecordNSParams parameters for request for creating NS records
-type addRecordNSParams struct {
+// updateRecordNSParams parameters for request for updating NS records
+type updateRecordNSParams struct {
 	DomainID string `json:"DomainId"`
 	HostName string `json:"HostName"`
 	Name     string `json:"Name"`
 	TTL      string `json:"TTL,omitempty"`
 }
 
-// addRecordSRVParams parameters for request for creating SRV records
-type addRecordSRVParams struct {
+// updateRecordSRVParams parameters for request for updating SRV records
+type updateRecordSRVParams struct {
 	DomainID string `json:"DomainId"`
 	Service  string `json:"Service"`
 	Proto    string `json:"Proto"`
@@ -96,15 +93,15 @@ type addRecordSRVParams struct {
 	TTL      string `json:"TTL,omitempty"`
 }
 
-// addRecordTXTParams parameters for request for creating TXT records
-type addRecordTXTParams struct {
+// updateRecordTXTParams parameters for request for updating TXT records
+type updateRecordTXTParams struct {
 	DomainID string `json:"DomainId"`
 	Name     string `json:"Name"`
 	Text     string `json:"Text"`
 	TTL      string `json:"TTL,omitempty"`
 }
 
-func makeAddRecordACommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordACommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
@@ -115,7 +112,7 @@ func makeAddRecordACommand(domainID uint64, record Record) (command, error) {
 		return command{}, errors.Errorf("IP %q is incorrect", record.IP)
 	}
 
-	params := addRecordAParams{
+	params := updateRecordAParams{
 		DomainID: strconv.FormatUint(domainID, 10),
 		IP:       ip.String(),
 		Name:     record.HostName,
@@ -123,13 +120,13 @@ func makeAddRecordACommand(domainID uint64, record Record) (command, error) {
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recorda",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recorda/%d", record.ID),
 		params:   &params,
 	}, nil
 }
 
-func makeAddRecordAAAACommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordAAAACommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
@@ -140,7 +137,7 @@ func makeAddRecordAAAACommand(domainID uint64, record Record) (command, error) {
 		return command{}, errors.Errorf("IP %q is incorrect", record.IP)
 	}
 
-	params := addRecordAParams{
+	params := updateRecordAParams{
 		DomainID: strconv.FormatUint(domainID, 10),
 		IP:       ip.String(),
 		Name:     record.HostName,
@@ -148,19 +145,19 @@ func makeAddRecordAAAACommand(domainID uint64, record Record) (command, error) {
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recordaaaa",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recordaaaa/%d", record.ID),
 		params:   &params,
 	}, nil
 }
 
-func makeAddRecordCNAMECommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordCNAMECommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
 	}
 
-	params := addRecordCNAMEParams{
+	params := updateRecordCNAMEParams{
 		DomainID:     strconv.FormatUint(domainID, 10),
 		Name:         record.HostName,
 		MnemonicName: record.MnemonicName,
@@ -168,19 +165,19 @@ func makeAddRecordCNAMECommand(domainID uint64, record Record) (command, error) 
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recordcname",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recordcname/%d", record.ID),
 		params:   &params,
 	}, nil
 }
 
-func makeAddRecordMXCommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordMXCommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
 	}
 
-	params := addRecordMXParams{
+	params := updateRecordMXParams{
 		DomainID: strconv.FormatUint(domainID, 10),
 		HostName: record.HostName,
 		Priority: record.Priority,
@@ -188,19 +185,19 @@ func makeAddRecordMXCommand(domainID uint64, record Record) (command, error) {
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recordmx",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recordmx/%d", record.ID),
 		params:   &params,
 	}, nil
 }
 
-func makeAddRecordNSCommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordNSCommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
 	}
 
-	params := addRecordNSParams{
+	params := updateRecordNSParams{
 		DomainID: strconv.FormatUint(domainID, 10),
 		HostName: record.HostName,
 		Name:     record.ExtHostName,
@@ -208,19 +205,19 @@ func makeAddRecordNSCommand(domainID uint64, record Record) (command, error) {
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recordns",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recordns/%d", record.ID),
 		params:   &params,
 	}, nil
 }
 
-func makeAddRecordSRVCommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordSRVCommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
 	}
 
-	params := addRecordSRVParams{
+	params := updateRecordSRVParams{
 		DomainID: strconv.FormatUint(domainID, 10),
 		Service:  record.Service,
 		Proto:    record.Proto,
@@ -233,19 +230,19 @@ func makeAddRecordSRVCommand(domainID uint64, record Record) (command, error) {
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recordsrv",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recordsrv/%d", record.ID),
 		params:   &params,
 	}, nil
 }
 
-func makeAddRecordTXTCommand(domainID uint64, record Record) (command, error) {
+func makeUpdateRecordTXTCommand(domainID uint64, record Record) (command, error) {
 	ttl, err := getTTL(record.TTL)
 	if err != nil {
 		return command{}, err
 	}
 
-	params := addRecordTXTParams{
+	params := updateRecordTXTParams{
 		DomainID: strconv.FormatUint(domainID, 10),
 		Name:     record.HostName,
 		Text:     record.Text,
@@ -253,8 +250,8 @@ func makeAddRecordTXTCommand(domainID uint64, record Record) (command, error) {
 	}
 
 	return command{
-		method:   http.MethodPost,
-		endpoint: "dns/recordtxt",
+		method:   http.MethodPut,
+		endpoint: fmt.Sprintf("dns/recordtxt/%d", record.ID),
 		params:   &params,
 	}, nil
 }
